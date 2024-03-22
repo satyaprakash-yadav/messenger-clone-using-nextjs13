@@ -10,6 +10,7 @@ import Avatar from "@/app/components/Avatar";
 // import Modal from "@/app/components/Modal";
 import ConfirmModal from "./ConfirmModal";
 import AvatarGroup from "@/app/components/AvatarGroup";
+import useActiveList from "@/app/hooks/useActiveList";
 
 interface ProfileDrawerProps {
   data: Conversation & {
@@ -22,6 +23,9 @@ interface ProfileDrawerProps {
 const ProfileDrawer = ({ data, isOpen, onClose }: ProfileDrawerProps) => {
   const otherUser = useOtherUser(data);
   const [confirmModal, setConfirmModal] = useState(false);
+
+  const { members } = useActiveList();
+  const isActive = members.indexOf(otherUser?.email!) !== -1;
 
   const joinedDate = useMemo(() => {
     return format(new Date(otherUser.createdAt), "PP");
@@ -36,8 +40,8 @@ const ProfileDrawer = ({ data, isOpen, onClose }: ProfileDrawerProps) => {
       return `${data.users.length} members`;
     }
 
-    return "Active";
-  }, [data]);
+    return isActive ? "Active": "Offline";
+  }, [data, isActive]);
 
   return (
     <>
@@ -70,7 +74,7 @@ const ProfileDrawer = ({ data, isOpen, onClose }: ProfileDrawerProps) => {
                   leave="transform transition ease-in-out duration-500"
                   leaveTo="translate-x-full"
                 >
-                  <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
+                  <Dialog.Panel className="pointer-events-auto w-screen md:max-w-sm max-w-md">
                     <div className="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl">
                       <div className="px-4 sm:px-6">
                         <div className="flex items-start justify-start">
@@ -130,7 +134,9 @@ const ProfileDrawer = ({ data, isOpen, onClose }: ProfileDrawerProps) => {
                                     Emails
                                   </dt>
                                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2">
-                                    {data.users.map((user)=> user.email).join(",\n")}
+                                    {data.users
+                                      .map((user) => user.email)
+                                      .join(",\n")}
                                   </dd>
                                 </div>
                               )}

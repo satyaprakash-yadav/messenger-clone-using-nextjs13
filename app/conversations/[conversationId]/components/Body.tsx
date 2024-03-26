@@ -1,18 +1,19 @@
 "use client";
 
+import axios from "axios";
+import MessageBox from "./MessageBox";
 import useConversation from "@/app/hooks/useConversation";
+
+import { find } from "lodash";
+import { pusherClient } from "@/app/libs/pusher";
 import { FullMessageType } from "@/app/types";
 import { useEffect, useRef, useState } from "react";
-import MessageBox from "./MessageBox";
-import axios from "axios";
-import { pusherClient } from "@/app/libs/pusher";
-import { find } from "lodash";
 
 interface BodyProps {
-  initialMessages: FullMessageType[];
+  initialMessages: FullMessageType[] | null;
 }
 
-const Body = ({ initialMessages = [] }: BodyProps) => {
+const Body = ({ initialMessages }: BodyProps) => {
   const [messages, setMessages] = useState(initialMessages);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -34,7 +35,7 @@ const Body = ({ initialMessages = [] }: BodyProps) => {
           return current;
         }
 
-        return [...current, message];
+        return [...current!, message];
       });
 
       bottomRef?.current?.scrollIntoView();
@@ -42,7 +43,7 @@ const Body = ({ initialMessages = [] }: BodyProps) => {
 
     const updateMessageHandler = (newMessage: FullMessageType) => {
       setMessages((current) =>
-        current.map((currentMessage) => {
+        current!.map((currentMessage) => {
           if (currentMessage.id === newMessage.id) {
             return newMessage;
           }
